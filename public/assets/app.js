@@ -61,6 +61,54 @@
     } catch (err) { flash(el, 'ring-red-500'); alert(err.message); return false; }
   }
 
+  async function saveCustomer(el, field, value) {
+    const customerId = el.closest('[data-customer-row]')?.dataset.customerId;
+    if (!customerId) return false;
+    try {
+      const res = await fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+        body: JSON.stringify({ customer_id: customerId, field, value }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.ok) throw new Error(result.error || 'Save failed');
+      flash(el, 'ring-brand-green');
+      if (field === 'birth_date') {
+        const row = el.closest('[data-customer-row]');
+        const color = birthdayClass(value);
+        row.classList.remove('bg-red-100', 'bg-green-100');
+        if (color) row.classList.add(color);
+      }
+      return true;
+    } catch (err) { flash(el, 'ring-red-500'); alert(err.message); return false; }
+  }
+
+  function birthdayClass(value) {
+    if (!value) return '';
+    const [year, month, day] = value.split('-').map(Number);
+    if (!year || !month || !day) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let nearest = Infinity;
+    for (const birthdayYear of [today.getFullYear() - 1, today.getFullYear(), today.getFullYear() + 1]) {
+      const birthday = new Date(birthdayYear, month - 1, Math.min(day, new Date(birthdayYear, month, 0).getDate()));
+      nearest = Math.min(nearest, Math.abs(Math.round((birthday - today) / 86400000)));
+    }
+    return nearest === 0 ? 'bg-green-100' : nearest <= 7 ? 'bg-red-100' : '';
+  }
+
+  document.addEventListener('change', (event) => {
+    const product = event.target.closest('[data-customer-product]');
+    if (product) {
+      const row = product.closest('[data-customer-row]');
+      const selected = [...row.querySelectorAll('[data-customer-product]:checked')].map((item) => item.value);
+      saveCustomer(product, 'product_codes', selected);
+      return;
+    }
+    const field = event.target.closest('[data-customer-field]');
+    if (field) saveCustomer(field, field.dataset.customerField, field.value);
+  });
+
   // ✓ / ✗ cells
   document.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-toggle]');

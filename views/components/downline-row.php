@@ -9,7 +9,8 @@
   </td>
   <td class="min-w-[190px] space-y-1 px-3 py-2">
     <div class="text-center"><?php component('toggle', ['field' => 'consume_product', 'on' => $r['consume_product']]); ?></div>
-    <?php component('input', ['namex' => 'product_name', 'value' => $r['product_name'] ?? '', 'placeholder' => 'Product', 'required' => false, 'compact' => true, 'attrs' => 'data-field="product_name"']); ?>
+    <!-- <?php component('input', ['namex' => 'product_name', 'value' => $r['product_name'] ?? '', 'placeholder' => 'Product', 'required' => false, 'compact' => true, 'attrs' => 'data-field="product_name"']); ?> -->
+    <?php component('select', ['namex' => 'product_name', 'options' => Products::products(), 'selected' => $r['product_name'] ?? '', 'placeholder' => 'Pilih Product', 'required' => false, 'compact' => true, 'attrs' => 'data-field="product_name"']); ?>
     <?php component('input', ['namex' => 'consume_date', 'type' => 'date', 'value' => $r['consume_date'] ?? '', 'required' => false, 'compact' => true, 'attrs' => 'data-field="consume_date"']); ?>
   </td>
   <?php foreach (['prospect_list', 'welcome_to_eskayvie', 'product', 'marketing_plan', 'hbo'] as $f): ?>

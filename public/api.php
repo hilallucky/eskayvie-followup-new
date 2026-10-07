@@ -6,6 +6,10 @@ $u = Auth::user() ?? out(401, ['ok' => false, 'error' => 'Please log in again.']
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !csrf_check($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null)) out(419, ['ok' => false, 'error' => 'Session expired, reload the page.']);
 $in = json_decode(file_get_contents('php://input'), true) ?: [];
 try {
+    if (isset($in['customer_id'])) {
+        Customers::update($u['username'], (int)$in['customer_id'], (string)($in['field'] ?? ''), $in['value'] ?? '');
+        out(200, ['ok' => true]);
+    }
     $m = Members::find((string)($in['member_code'] ?? ''));
     if (!$m || $m['sponsor_code'] !== $u['member_code']) out(404, ['ok' => false, 'error' => 'Downline not found.']); // ownership check
     $field = (string)($in['field'] ?? ''); $value = $in['value'] ?? '';
