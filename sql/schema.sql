@@ -152,3 +152,69 @@ CREATE TABLE customer_products (
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
   FOREIGN KEY (product_code) REFERENCES products(product_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE prospects (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(30) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  phone_number VARCHAR(40) NULL,
+  domicile VARCHAR(120) NULL,
+  occupation VARCHAR(120) NULL,
+  prospect_date DATE NULL,
+  response ENUM('Baik','Kurang','Tidak Baik') NULL,
+  reason TEXT NULL,
+  follow_up TINYINT(1) NOT NULL DEFAULT 0,
+  follow_up_date DATE NULL,
+  created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_date DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_prospects_user (username, id),
+  FOREIGN KEY (username) REFERENCES users(username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE daily_task_months (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(30) NOT NULL,
+  task_month TINYINT UNSIGNED NOT NULL,
+  task_year SMALLINT UNSIGNED NOT NULL,
+  created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_date DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_daily_task_month (username, task_year, task_month),
+  FOREIGN KEY (username) REFERENCES users(username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE daily_task_entries (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  month_record_id INT UNSIGNED NOT NULL,
+  day_of_month TINYINT UNSIGNED NOT NULL,
+  learn TINYINT(1) NOT NULL DEFAULT 0,
+  video_onboarding TINYINT(1) NOT NULL DEFAULT 0,
+  consume_product TINYINT(1) NOT NULL DEFAULT 0,
+  repeat_order TINYINT(1) NOT NULL DEFAULT 0,
+  attend_zoom TINYINT(1) NOT NULL DEFAULT 0,
+  contact_upline TINYINT(1) NOT NULL DEFAULT 0,
+  sponsoring TINYINT(1) NOT NULL DEFAULT 0,
+  UNIQUE KEY uq_daily_task_day (month_record_id, day_of_month),
+  FOREIGN KEY (month_record_id) REFERENCES daily_task_months(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE side_volume_months (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(30) NOT NULL,
+  target_year SMALLINT UNSIGNED NOT NULL,
+  target_month TINYINT UNSIGNED NOT NULL,
+  created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_date DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_side_volume_month (username, target_year, target_month),
+  FOREIGN KEY (username) REFERENCES users(username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE side_volume_entries (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  side_volume_month_id INT UNSIGNED NOT NULL,
+  product_code VARCHAR(20) NOT NULL,
+  target_value DECIMAL(15,2) NULL,
+  actual_value DECIMAL(15,2) NULL,
+  UNIQUE KEY uq_side_volume_product (side_volume_month_id, product_code),
+  FOREIGN KEY (side_volume_month_id) REFERENCES side_volume_months(id) ON DELETE CASCADE,
+  FOREIGN KEY (product_code) REFERENCES products(product_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -6,6 +6,21 @@ $u = Auth::user() ?? out(401, ['ok' => false, 'error' => 'Please log in again.']
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !csrf_check($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null)) out(419, ['ok' => false, 'error' => 'Session expired, reload the page.']);
 $in = json_decode(file_get_contents('php://input'), true) ?: [];
 try {
+    if (isset($in['daily_task'])) {
+        DailyTasks::save(
+            $u['username'],
+            (int)($in['month'] ?? 0),
+            (int)($in['year'] ?? 0),
+            (int)($in['day'] ?? 0),
+            (string)($in['field'] ?? ''),
+            $in['value'] ?? null
+        );
+        out(200, ['ok' => true]);
+    }
+    if (isset($in['prospect_id'])) {
+        Prospects::update($u['username'], (int)$in['prospect_id'], (string)($in['field'] ?? ''), $in['value'] ?? '');
+        out(200, ['ok' => true]);
+    }
     if (isset($in['customer_id'])) {
         Customers::update($u['username'], (int)$in['customer_id'], (string)($in['field'] ?? ''), $in['value'] ?? '');
         out(200, ['ok' => true]);

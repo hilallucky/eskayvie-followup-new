@@ -1,0 +1,13 @@
+<?php /* props: $i (display number), $prospect */ ?>
+<tr class="border-b border-gray-200 align-top hover:bg-purple-50/40" data-prospect-row data-prospect-id="<?= (int)$prospect['id'] ?>">
+  <td class="px-2 py-2 text-right"><?= (int)$i ?></td>
+  <td class="min-w-[170px] px-2 py-2"><?php component('input', ['namex' => 'name', 'value' => $prospect['name'], 'compact' => true, 'attrs' => 'data-prospect-field="name"']); ?></td>
+  <td class="min-w-[150px] px-2 py-2"><?php component('input', ['namex' => 'phone_number', 'value' => $prospect['phone_number'] ?? '', 'required' => false, 'compact' => true, 'attrs' => 'data-prospect-field="phone_number"']); ?></td>
+  <td class="min-w-[150px] px-2 py-2"><?php component('input', ['namex' => 'domicile', 'value' => $prospect['domicile'] ?? '', 'required' => false, 'compact' => true, 'attrs' => 'data-prospect-field="domicile"']); ?></td>
+  <td class="min-w-[150px] px-2 py-2"><?php component('input', ['namex' => 'occupation', 'value' => $prospect['occupation'] ?? '', 'required' => false, 'compact' => true, 'attrs' => 'data-prospect-field="occupation"']); ?></td>
+  <td class="min-w-[130px] px-2 py-2"><?php component('input', ['namex' => 'prospect_date', 'type' => 'date', 'value' => $prospect['prospect_date'] ?? '', 'required' => false, 'compact' => true, 'attrs' => 'data-prospect-field="prospect_date"']); ?></td>
+  <td class="min-w-[130px] px-2 py-2"><?php component('select', ['namex' => 'response', 'options' => Prospects::RESPONSES, 'selected' => $prospect['response'] ?? '', 'placeholder' => 'Pilih response', 'compact' => true, 'attrs' => 'data-prospect-field="response"']); ?></td>
+  <td class="min-w-[180px] px-2 py-2"><?php component('textarea', ['namex' => 'reason', 'value' => $prospect['reason'] ?? '', 'maxlength' => 2000, 'rows' => 1, 'ariaLabel' => 'Alasan for ' . $prospect['name'], 'attrs' => 'data-prospect-field="reason" data-auto-grow']); ?></td>
+  <td class="min-w-[100px] px-2 py-2"><?php component('select', ['namex' => 'follow_up', 'options' => Prospects::FOLLOW_UP_OPTIONS, 'selected' => (string)$prospect['follow_up'], 'compact' => true, 'attrs' => 'data-prospect-field="follow_up"']); ?></td>
+  <td class="min-w-[140px] px-2 py-2"><?php component('input', ['namex' => 'follow_up_date', 'type' => 'date', 'value' => $prospect['follow_up_date'] ?? '', 'required' => false, 'compact' => true, 'attrs' => 'data-prospect-field="follow_up_date"']); ?></td>
+</tr>

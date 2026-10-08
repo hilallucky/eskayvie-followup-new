@@ -48,6 +48,9 @@
           <a href="monthly-target.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Monthly Target</a>
           <a href="activity-record-plan.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Activity Record &amp; Plan</a>
           <a href="customer-list.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Customer List</a>
+          <a href="prospect-list.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Prospect List</a>
+          <a href="daily-tasks.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">7 Daily Tasks</a>
+          <a href="side-volume-target.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Monthly Side Volume Target</a>
           <!-- <a href="index.php#add-downline" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Add New Downline</a>
           <a href="index.php#downline-list" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Downline List</a> -->
         </div>

@@ -61,6 +61,28 @@
     } catch (err) { flash(el, 'ring-red-500'); alert(err.message); return false; }
   }
 
+  async function saveDailyTask(button, field, value) {
+    const row = button.closest('[data-daily-task-row]');
+    try {
+      const res = await fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+        body: JSON.stringify({
+          daily_task: true,
+          month: Number(row.dataset.month),
+          year: Number(row.dataset.year),
+          day: Number(row.dataset.day),
+          field,
+          value,
+        }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.ok) throw new Error(result.error || 'Save failed');
+      flash(button, 'ring-brand-green');
+      return true;
+    } catch (err) { flash(button, 'ring-red-500'); alert(err.message); return false; }
+  }
+
   async function saveCustomer(el, field, value) {
     const customerId = el.closest('[data-customer-row]')?.dataset.customerId;
     if (!customerId) return false;
@@ -79,6 +101,22 @@
         row.classList.remove('bg-red-100', 'bg-green-100');
         if (color) row.classList.add(color);
       }
+      return true;
+    } catch (err) { flash(el, 'ring-red-500'); alert(err.message); return false; }
+  }
+
+  async function saveProspect(el, field, value) {
+    const prospectId = el.closest('[data-prospect-row]')?.dataset.prospectId;
+    if (!prospectId) return false;
+    try {
+      const res = await fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+        body: JSON.stringify({ prospect_id: prospectId, field, value }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.ok) throw new Error(result.error || 'Save failed');
+      flash(el, 'ring-brand-green');
       return true;
     } catch (err) { flash(el, 'ring-red-500'); alert(err.message); return false; }
   }
@@ -106,7 +144,12 @@
       return;
     }
     const field = event.target.closest('[data-customer-field]');
-    if (field) saveCustomer(field, field.dataset.customerField, field.value);
+    if (field) {
+      saveCustomer(field, field.dataset.customerField, field.value);
+      return;
+    }
+    const prospect = event.target.closest('[data-prospect-field]');
+    if (prospect) saveProspect(prospect, prospect.dataset.prospectField, prospect.value);
   });
 
   // ✓ / ✗ cells
@@ -114,7 +157,11 @@
     const b = e.target.closest('[data-toggle]');
     if (!b) return;
     const next = b.dataset.value === '1' ? 0 : 1;
-    if (await save(b, b.dataset.toggle, next)) {
+    const row = b.closest('[data-daily-task-row]');
+    const saved = row
+      ? await saveDailyTask(b, b.dataset.toggle, next)
+      : await save(b, b.dataset.toggle, next);
+    if (saved) {
       b.dataset.value = next; b.textContent = next ? '✓' : '✗';
       b.classList.toggle('text-brand-forest', !!next); b.classList.toggle('text-gray-400', !next);
     }
@@ -163,10 +210,32 @@
     const field = document.getElementById(button.dataset.numberTarget);
     if (!field || (field.value !== '' && !numberPattern.test(field.value))) return;
     const current = Number(field.value.replace(/,/g, '') || 0);
-    const next = Math.max(0, current + Number(button.dataset.numberStep));
-    if (!Number.isSafeInteger(next)) return;
-    field.value = formatGroupedNumber(String(next));
-    updateNumberValidity(field);
+    const increment = Number(button.dataset.numberStep);
+    const precision = (String(Math.abs(increment)).split('.')[1] ?? '').length;
+    const next = Number(Math.max(0, current + increment).toFixed(precision));
+    if (!Number.isFinite(next) || (field.matches('[data-number-format]') && !Number.isSafeInteger(next))) return;
+    field.value = field.matches('[data-number-format]') ? formatGroupedNumber(String(next)) : String(next);
+    if (field.matches('[data-number-format]')) updateNumberValidity(field);
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  document.querySelectorAll('[data-year-auto-load]').forEach((form) => {
+    let submitTimer;
+    const scheduleSubmit = (input) => {
+      clearTimeout(submitTimer);
+      if (!input.value || !input.validity.valid) return;
+      submitTimer = setTimeout(() => form.requestSubmit(), 400);
+    };
+    form.addEventListener('input', (event) => {
+      const input = event.target.closest('[data-auto-load-year]');
+      if (input) scheduleSubmit(input);
+    });
+    form.addEventListener('change', (event) => {
+      const input = event.target.closest('[data-auto-load-year]');
+      if (!input || !input.value || !input.validity.valid) return;
+      clearTimeout(submitTimer);
+      form.requestSubmit();
+    });
   });
 
   document.querySelectorAll('[data-autocomplete-input]').forEach((input) => {
