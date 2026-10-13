@@ -32,15 +32,15 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]);
     component('input', ['label' => 'Domisili', 'namex' => 'domicile', 'required' => false]);
     component('input', ['label' => 'Pekerjaan', 'namex' => 'occupation', 'required' => false]);
     component('input', ['label' => 'Tanggal', 'namex' => 'prospect_date', 'type' => 'date', 'required' => false]);
-    component('select', ['label' => 'Response', 'namex' => 'response', 'options' => Prospects::RESPONSES, 'placeholder' => 'Pilih response']);
-    component('select', ['label' => 'Follow-up', 'namex' => 'follow_up', 'options' => Prospects::FOLLOW_UP_OPTIONS, 'selected' => '0']);
+    component('select', ['label' => 'Response', 'namex' => 'response', 'options' => Prospects::RESPONSES, 'placeholder' => 'Pilih response', 'autocomplete' => true]);
+    component('select', ['label' => 'Follow-up', 'namex' => 'follow_up', 'options' => Prospects::FOLLOW_UP_OPTIONS, 'selected' => '0', 'autocomplete' => true]);
     component('input', ['label' => 'Follow-up Date', 'namex' => 'follow_up_date', 'type' => 'date', 'required' => false]);
     ?>
     <label class="grid gap-1 text-sm font-medium text-gray-700 sm:col-span-2 xl:col-span-4">Alasan
       <?php component('textarea', ['namex' => 'reason', 'maxlength' => 2000, 'rows' => 2, 'ariaLabel' => 'Alasan', 'attrs' => 'data-auto-grow']); ?>
     </label>
     <div class="sm:col-span-2 xl:col-span-4">
-      <button type="submit" class="rounded bg-brand-purple px-4 py-2 text-sm font-semibold text-white hover:bg-brand-deep">Add Prospect</button>
+      <?php component('button', ['label' => 'Add Prospect', 'type' => 'submit']); ?>
     </div>
   </form>
 </details>

@@ -52,12 +52,12 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]);
   <label class="grid gap-1 text-sm font-medium">Tahun
     <?php component('number-stepper', ['id' => 'side-volume-year', 'namex' => 'year', 'value' => $year, 'step' => '1', 'min' => 1900, 'max' => 9999, 'ariaLabel' => 'Tahun', 'attrs' => 'data-auto-load-year required']); ?>
   </label>
-  <button type="submit" class="rounded bg-brand-purple px-4 py-2 text-sm font-semibold text-white hover:bg-brand-deep">Tampilkan</button>
+  <?php component('button', ['label' => 'Tampilkan', 'type' => 'submit']); ?>
 </form>
 
 <form method="post">
-  <input type="hidden" name="_csrf" value="<?= e(csrf()) ?>">
-  <input type="hidden" name="year" value="<?= $year ?>">
+  <?php component('input', ['type' => 'hidden', 'namex' => '_csrf', 'value' => csrf()]); ?>
+  <?php component('input', ['type' => 'hidden', 'namex' => 'year', 'value' => $year]); ?>
   <div class="overflow-x-auto rounded border border-gray-300">
     <table class="w-full min-w-[1600px] border-collapse text-sm">
       <thead class="bg-brand-purple text-white">
@@ -110,7 +110,7 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]);
     </table>
   </div>
   <div class="mt-4 flex justify-end">
-    <button type="submit" class="w-full rounded bg-brand-purple px-5 py-2 font-semibold text-white hover:bg-brand-deep sm:w-auto">Simpan Target</button>
+    <?php component('button', ['label' => 'Simpan Target', 'type' => 'submit', 'className' => 'w-full px-5 sm:w-auto']); ?>
   </div>
 </form>
 <?php component('layout-end'); ?>

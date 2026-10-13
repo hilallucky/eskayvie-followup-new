@@ -24,7 +24,7 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]); ?
     <input type="hidden" name="_csrf" value="<?= e(csrf()) ?>">
     <?php
     component('input', ['label' => 'Name', 'namex' => 'name', 'placeholder' => 'Input Downline Name']);
-    component('select', ['label' => 'Rank', 'namex' => 'rank_code', 'options' => Members::ranks()]);
+    component('select', ['label' => 'Rank', 'namex' => 'rank_code', 'options' => Members::ranks(), 'autocomplete' => true]);
     component('input', ['label' => 'Join Date', 'namex' => 'join_date', 'type' => 'date', 'value' => date('Y-m-d')]);
     component('button', ['label' => 'Add', 'type' => 'submit']);
     ?>

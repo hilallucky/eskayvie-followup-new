@@ -53,15 +53,9 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]);
 }
 </style>
 <form method="get" class="mb-5 flex flex-wrap items-end gap-3" data-month-selector>
-  <label class="grid gap-1 text-sm font-medium">Bulan
-    <select name="month" class="rounded border border-gray-300 bg-white px-3 py-2" data-month-field>
-      <?php foreach ($months as $number => $label): ?><option value="<?= $number ?>" <?= $month === $number ? 'selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?>
-    </select>
-  </label>
-  <label class="grid gap-1 text-sm font-medium">Tahun
-    <input type="number" name="year" min="1900" max="9999" value="<?= $year ?>" class="w-28 rounded border border-gray-300 px-3 py-2 text-right" data-month-field>
-  </label>
-  <button type="submit" class="rounded bg-brand-purple px-4 py-2 text-sm font-semibold text-white hover:bg-brand-deep">Tampilkan</button>
+  <?php component('select', ['label' => 'Bulan', 'labelClassName' => 'grid gap-1 text-sm font-medium', 'namex' => 'month', 'options' => $months, 'selected' => $month, 'autocomplete' => true, 'className' => 'w-auto rounded border border-gray-300 bg-white px-3 py-2', 'attrs' => 'data-month-field']); ?>
+  <?php component('input', ['label' => 'Tahun', 'labelClassName' => 'grid gap-1 text-sm font-medium', 'namex' => 'year', 'type' => 'number', 'value' => $year, 'required' => false, 'className' => 'w-28 rounded border border-gray-300 px-3 py-2 text-right', 'attrs' => 'min="1900" max="9999" data-month-field']); ?>
+  <?php component('button', ['label' => 'Tampilkan', 'type' => 'submit']); ?>
 </form>
 
 <form method="post">
@@ -91,7 +85,7 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]);
           </td>
           <td class="px-2 py-2">
             <span class="mb-1 block text-xs font-semibold text-gray-600 md:hidden">Status</span>
-            <?php component('select', ['namex' => "entries[$day][status_id]", 'options' => $statuses, 'selected' => $entry['status_id'] ?? '', 'compact' => true]); ?>
+            <?php component('select', ['namex' => "entries[$day][status_id]", 'options' => $statuses, 'selected' => $entry['status_id'] ?? '', 'autocomplete' => true, 'compact' => true]); ?>
           </td>
         </tr>
         <?php endfor; ?>
@@ -99,7 +93,7 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]);
     </table>
   </div>
   <div class="mt-4 flex justify-end">
-    <button type="submit" class="w-full rounded bg-brand-purple px-5 py-2 font-semibold text-white hover:bg-brand-deep sm:w-auto">Simpan Aktivitas</button>
+    <?php component('button', ['label' => 'Simpan Aktivitas', 'type' => 'submit', 'className' => 'w-full px-5 sm:w-auto']); ?>
   </div>
 </form>
 <?php component('layout-end'); ?>

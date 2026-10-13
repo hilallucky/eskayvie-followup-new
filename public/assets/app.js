@@ -145,11 +145,19 @@
     }
     const field = event.target.closest('[data-customer-field]');
     if (field) {
-      saveCustomer(field, field.dataset.customerField, field.value);
+      const displayField = field.dataset.autocompleteVisible
+        ? document.getElementById(field.dataset.autocompleteVisible)
+        : field;
+      saveCustomer(displayField ?? field, field.dataset.customerField, field.value);
       return;
     }
     const prospect = event.target.closest('[data-prospect-field]');
-    if (prospect) saveProspect(prospect, prospect.dataset.prospectField, prospect.value);
+    if (prospect) {
+      const displayField = prospect.dataset.autocompleteVisible
+        ? document.getElementById(prospect.dataset.autocompleteVisible)
+        : prospect;
+      saveProspect(displayField ?? prospect, prospect.dataset.prospectField, prospect.value);
+    }
   });
 
   // ✓ / ✗ cells
@@ -170,7 +178,12 @@
   // inputs / selects save on change (text inputs fire on blur)
   document.addEventListener('change', (e) => {
     const f = e.target.closest('[data-field]');
-    if (f) save(f, f.dataset.field, f.value);
+    if (f) {
+      const displayField = f.dataset.autocompleteVisible
+        ? document.getElementById(f.dataset.autocompleteVisible)
+        : f;
+      save(displayField ?? f, f.dataset.field, f.value);
+    }
   });
 
   document.querySelector('[data-month-selector]')?.addEventListener('change', (event) => {
@@ -246,10 +259,15 @@
       const entered = input.value.trim().toLocaleLowerCase();
       const option = [...options.options].find((item) => item.value.trim().toLocaleLowerCase() === entered);
       valueField.value = option?.dataset.value ?? '';
-      input.setCustomValidity(input.value === '' || option ? '' : 'Choose an option from the suggestions.');
+      const valid = !!option || (input.value === '' && input.dataset.autocompleteAllowEmpty === 'true');
+      input.setCustomValidity(valid ? '' : 'Choose an option from the suggestions.');
+      return valid;
     };
     input.addEventListener('input', syncValue);
-    input.addEventListener('change', syncValue);
+    input.addEventListener('change', () => {
+      if (syncValue()) valueField.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    syncValue();
   });
 
   const autoGrow = (field) => {

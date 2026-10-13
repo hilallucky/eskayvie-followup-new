@@ -24,15 +24,9 @@ $entries = DailyTasks::forMonth($u['username'], $month, $year);
 component('layout-start', ['title' => '7 Daily Tasks', 'user' => $u, 'wide' => true]);
 ?>
 <form method="get" class="mb-5 flex flex-wrap items-end gap-3 rounded border border-purple-200 bg-purple-50 px-4 py-3" data-month-selector>
-  <label class="grid gap-1 text-sm font-medium text-brand-purple">Bulan
-    <select name="month" class="rounded border border-gray-300 bg-white px-3 py-2" data-month-field>
-      <?php foreach ($months as $number => $label): ?><option value="<?= $number ?>" <?= $month === $number ? 'selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?>
-    </select>
-  </label>
-  <label class="grid gap-1 text-sm font-medium text-brand-purple">Tahun
-    <input type="number" name="year" min="1900" max="9999" value="<?= $year ?>" class="w-28 rounded border border-gray-300 bg-white px-3 py-2 text-right" data-month-field>
-  </label>
-  <button type="submit" class="rounded bg-brand-purple px-4 py-2 text-sm font-semibold text-white hover:bg-brand-deep">Tampilkan</button>
+  <?php component('select', ['label' => 'Bulan', 'labelClassName' => 'grid gap-1 text-sm font-medium text-brand-purple', 'namex' => 'month', 'options' => $months, 'selected' => $month, 'autocomplete' => true, 'className' => 'w-auto rounded border border-gray-300 bg-white px-3 py-2', 'attrs' => 'data-month-field']); ?>
+  <?php component('input', ['label' => 'Tahun', 'labelClassName' => 'grid gap-1 text-sm font-medium text-brand-purple', 'namex' => 'year', 'type' => 'number', 'value' => $year, 'required' => false, 'className' => 'w-28 rounded border border-gray-300 bg-white px-3 py-2 text-right', 'attrs' => 'min="1900" max="9999" data-month-field']); ?>
+  <?php component('button', ['label' => 'Tampilkan', 'type' => 'submit']); ?>
 </form>
 
 <style>

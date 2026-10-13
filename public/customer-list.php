@@ -46,7 +46,7 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]);
       <?php component('textarea', ['namex' => 'notes', 'maxlength' => 2000, 'rows' => 2, 'ariaLabel' => 'Catatan', 'attrs' => 'data-auto-grow']); ?>
     </label>
     <div class="sm:col-span-2 xl:col-span-4">
-      <button type="submit" class="rounded bg-brand-purple px-4 py-2 text-sm font-semibold text-white hover:bg-brand-deep">Add Customer</button>
+      <?php component('button', ['label' => 'Add Customer', 'type' => 'submit']); ?>
     </div>
   </form>
 </details>
