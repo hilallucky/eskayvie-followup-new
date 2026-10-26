@@ -23,4 +23,5 @@ if ($error) component('alert', ['message' => $error]); ?>
   ?>
   <div class="flex gap-2"><?php component('button', ['label' => 'Login', 'type' => 'submit']); component('button', ['label' => 'Signup', 'href' => 'signup.php', 'variant' => 'secondary']); ?></div>
 </form>
+<p class="mt-6 border-t border-gray-200 pt-4 text-sm text-gray-600">Looking for shared documents? <a href="content.php" class="font-medium text-brand-purple hover:underline">Browse Bank Content without logging in</a>.</p>
 <?php component('layout-end');

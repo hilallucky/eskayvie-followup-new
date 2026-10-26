@@ -6,10 +6,18 @@
    `php -d allow_url_fopen=On composer.phar install`
 4. Point the web root at `public/` (locally: `php -S localhost:8000 -t public`).
    On cPanel keep `src/`, `config/`, `vendor/` above `public_html` and put the contents of `public/` inside it (adjust the `require` path if you move things).
-5. Open `/signup.php`, register, confirm via the emailed link, log in with your username (your member code, e.g. ESK123456).
+   Alternatively, to keep the full project in `public_html/playbook/` with the entry point at `public_html/playbook/public/index.php`, place this repository's `.htaccess` in `public_html/playbook/`. It routes `/playbook/login.php` and other app URLs to `public/` without displaying that folder, and denies direct web access to the app's private directories. Apache `mod_rewrite` and `.htaccess` overrides must be enabled.
+5. Set `base_url` in `config/config.php` to `https://v-system.eskayvie.co.id/playbook` for email confirmation links when using that URL.
+6. Open `/signup.php`, register, confirm via the emailed link, log in with your username (your member code, e.g. ESK123456).
    Share `/signup.php?ref=ESK123456` to register someone under that sponsor.
 
-Structure: `src/` (Database, Auth, Users, Members, FollowUps, MonthlyTargets, ActivityPlans, Customers, Prospects, DailyTasks, SideVolumeTargets, Mailer), `views/components/` (layout, button, input, textarea, select, alert, toggle, downline-row, customer-row, prospect-row, daily-task-row, pagination), `public/` (pages, api.php, export.php, assets/app.js).
+   ## Public Bank Content
+   - Open `/content.php` to browse shared files without signing in. The same page is linked from the login form and the signed-in navigation.
+   - Add published documents to `storage/content/Accounts/`, `storage/content/Compliance/`, `storage/content/Lending/`, or `storage/content/Marketing/`. Create subfolders as needed; the folder list is discovered automatically.
+   - Supported public file types are PDF, DOC/DOCX, XLS/XLSX, CSV, TXT, and common GIF/JPEG/PNG/WebP images. PDF, image, text, CSV, XLSX, and DOCX files can be previewed; all supported files can be downloaded.
+   - The storage directory is not directly web-accessible. The file endpoint validates paths and only serves the supported file types. Anyone with access to the site can read and download files placed here, so do not add confidential documents.
+
+   Structure: `src/` (Database, Auth, Users, Members, FollowUps, MonthlyTargets, ActivityPlans, Customers, Prospects, DailyTasks, SideVolumeTargets, Mailer), `views/components/` (layout, button, input, textarea, select, alert, toggle, downline-row, customer-row, prospect-row, daily-task-row, pagination), `public/` (pages, api.php, export.php, assets/app.js).
 
 ## Errors and diagnostics
 - All PHP warnings, uncaught exceptions and database connection failures are written to `storage/logs/app.log` (passwords are never logged).

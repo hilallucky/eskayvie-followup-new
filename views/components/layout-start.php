@@ -45,6 +45,7 @@
         <summary class="cursor-pointer rounded px-3 py-2 text-sm font-semibold text-brand-purple hover:bg-purple-50">Form</summary>
         <div class="ml-3 border-l border-gray-200 pl-2">
           <a href="index.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Follow Up Checklist</a>
+          <a href="content.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Bank Content</a>
           <a href="monthly-target.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Monthly Target</a>
           <a href="activity-record-plan.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Activity Record &amp; Plan</a>
           <a href="customer-list.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Customer List</a>

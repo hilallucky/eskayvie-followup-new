@@ -1,0 +1,15 @@
+Options -Indexes
+RewriteEngine On
+
+RewriteCond %{THE_REQUEST} \s/+.*?/public(?:/|\s|\?) [NC]
+RewriteRule ^public/?$ ./ [R=301,L]
+RewriteCond %{THE_REQUEST} \s/+.*?/public/ [NC]
+RewriteRule ^public/(.*)$ $1 [R=301,L]
+
+RewriteRule ^(?:src|config|vendor|sql|storage|views)(?:/|$) - [F,L,NC]
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^(?:composer\.(?:json|lock)|README\.md)$ - [F,L,NC]
+
+RewriteRule ^public/ - [L]
+RewriteRule ^$ public/index.php [L]
+RewriteRule ^(.*)$ public/$1 [L]
