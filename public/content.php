@@ -379,9 +379,9 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
             </div>
           </div>
         <?php endif; ?>
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <div class="hidden grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-[11px] font-medium text-slate-500 sm:grid">
-            <span>Name</span><span>Owner</span><span>Last modified</span><span>File size</span><span>Status</span><span class="text-right">Actions</span>
+        <div class="relative rounded-lg border border-slate-200 bg-white">
+          <div class="hidden rounded-t-lg <?= $canManage ? 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' : 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' ?> gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-[11px] font-medium text-slate-500 sm:grid">
+            <span>Name</span><?php if ($canManage): ?><span>Owner</span><?php endif; ?><span>Last modified</span><span>File size</span><?php if ($canManage): ?><span>Status</span><?php endif; ?><span class="text-right">Actions</span>
           </div>
           <?php if (!$items): ?>
             <div class="px-5 py-14 text-center"><p class="text-sm font-medium text-slate-700"><?= $query === '' ? 'No items in this folder yet' : 'No items match your search' ?></p><?php if ($canManage && $query === ''): ?><p class="mt-2 text-xs text-slate-500">Upload a file or create a folder to get started.</p><?php endif; ?></div>
@@ -407,7 +407,7 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
                 ? 'content.php?folder=' . rawurlencode($item['id'])
                 : ($isLink ? (in_array(parse_url((string)$item['url'], PHP_URL_SCHEME), ['http', 'https'], true) ? (string)$item['url'] : '#') : ($hasFileContents ? 'content.php?folder=' . rawurlencode((string)($folderId ?? '')) . '&item=' . rawurlencode($item['id']) : '#'));
             ?>
-            <div class="grid gap-2 border-b border-slate-100 px-4 py-3 last:border-0 sm:grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)] sm:items-center sm:gap-3">
+            <div class="grid gap-2 border-b border-slate-100 px-4 py-3 last:border-0 sm:<?= $canManage ? 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' : 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' ?> sm:items-center sm:gap-3">
               <div class="flex min-w-0 items-center gap-2.5">
                 <span class="<?= $iconColor ?> flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                   <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -436,11 +436,15 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
                   <span class="mt-1 block text-[10px] font-normal text-slate-500 sm:hidden"><?= e($item['kind'] === 'folder' ? 'Folder' : ($item['mime_type'] ?? 'File')) ?><?= !$hasFileContents && !$isFolder && !$isLink ? ' · file contents not uploaded' : '' ?></span>
                 <?php if ($canOpen): ?></a><?php else: ?></span><?php endif; ?>
               </div>
-              <span class="hidden truncate text-[10px] text-slate-600 sm:block"><?= e($item['owner']) ?></span>
+              <?php if ($canManage): ?>
+                <span class="hidden truncate text-[10px] text-slate-600 sm:block"><?= e($item['owner']) ?></span>
+              <?php endif; ?>
               <span class="hidden text-[10px] text-slate-600 sm:block"><?= e(date('M j, Y', strtotime($item['modified_at']))) ?></span>
               <span class="hidden text-[10px] text-slate-600 sm:block"><?= e($formatSize($item['size'] === null ? null : (int)$item['size'])) ?></span>
-              <?php $statusClass = match ($item['status']) { 'Approved' => 'bg-emerald-50 text-emerald-700', 'In review' => 'bg-amber-50 text-amber-700', default => 'bg-sky-50 text-sky-700' }; ?>
-              <span class="hidden text-[10px] sm:block"><span class="<?= $statusClass ?> inline-flex rounded px-2 py-1 font-medium"><?= e($item['status']) ?></span></span>
+              <?php if ($canManage): ?>
+                <?php $statusClass = match ($item['status']) { 'Approved' => 'bg-emerald-50 text-emerald-700', 'In review' => 'bg-amber-50 text-amber-700', default => 'bg-sky-50 text-sky-700' }; ?>
+                <span class="hidden text-[10px] sm:block"><span class="<?= $statusClass ?> inline-flex rounded px-2 py-1 font-medium"><?= e($item['status']) ?></span></span>
+              <?php endif; ?>
               <div class="flex items-center justify-end gap-1">
                 <?php if (!$isFolder && !$isLink && $item['kind'] === 'file' && $item['stored_name']): ?>
                   <a aria-label="Download <?= e($item['name']) ?>" title="Download" href="content-file.php?id=<?= rawurlencode($item['id']) ?>&amp;download=1" class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-brand-purple"><svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v9m0 0 3-3m-3 3L7 9M4 13v3h12v-3"/></svg></a>
