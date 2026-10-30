@@ -1,8 +1,8 @@
-<?php $user = $user ?? null; $wide = $wide ?? false; $w = $wide ? 'max-w-7xl' : 'max-w-md'; ?>
+<?php $user = $user ?? null; $wide = $wide ?? false; $portal = $portal ?? false; $w = $wide ? 'max-w-7xl' : 'max-w-md'; ?>
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="csrf" content="<?= e(csrf()) ?>">
+<?php if (!$portal): ?><meta name="csrf" content="<?= e(csrf()) ?>"><?php endif; ?>
 <title><?= e($title) ?> · eskayvie</title>
 <!-- Dev: Tailwind CDN. For production, compile with the Tailwind CLI using the same color tokens. -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -17,7 +17,8 @@
 }
 </style>
 </head>
-<body class="min-h-screen bg-white text-gray-800 antialiased">
+<body class="<?= $portal ? 'min-h-screen bg-slate-100 text-slate-800 antialiased' : 'min-h-screen bg-white text-gray-800 antialiased' ?>">
+<?php if (!$portal): ?>
 <header class="border-b-4 border-brand-green bg-brand-purple text-white">
   <div class="mx-auto flex items-center justify-between px-4 py-3 <?= $w ?>">
     <div class="flex items-center gap-3">
@@ -37,7 +38,10 @@
     <?php endif; ?>
   </div>
 </header>
-<?php if ($user): ?>
+<?php endif; ?>
+<?php if ($portal): ?>
+<main class="min-h-screen w-full p-0">
+<?php elseif ($user): ?>
 <div class="mx-auto flex max-w-7xl">
   <aside id="app-sidebar" data-sidebar data-open="false" data-collapsed="false" class="fixed inset-y-0 left-0 z-40 w-64 border-r border-gray-200 bg-white pt-20 shadow-lg transition-transform duration-200 md:sticky md:top-0 md:z-auto md:h-[calc(100vh-4rem)] md:w-56 md:shrink-0 md:pt-6 md:shadow-none">
     <nav aria-label="Main navigation" class="space-y-1 px-3">
@@ -45,7 +49,7 @@
         <summary class="cursor-pointer rounded px-3 py-2 text-sm font-semibold text-brand-purple hover:bg-purple-50">Form</summary>
         <div class="ml-3 border-l border-gray-200 pl-2">
           <a href="index.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Follow Up Checklist</a>
-          <a href="content.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Bank Content</a>
+          <!-- <a href="content.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Bank Content</a> -->
           <a href="monthly-target.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Monthly Target</a>
           <a href="activity-record-plan.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Activity Record &amp; Plan</a>
           <a href="customer-list.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Customer List</a>
@@ -54,6 +58,13 @@
           <a href="side-volume-target.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Monthly Side Volume Target</a>
           <!-- <a href="index.php#add-downline" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Add New Downline</a>
           <a href="index.php#downline-list" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Downline List</a> -->
+        </div>
+      </details>
+      
+      <details class="group">
+        <summary class="cursor-pointer rounded px-3 py-2 text-sm font-semibold text-brand-purple hover:bg-purple-50">Bank Content</summary>
+        <div class="ml-3 mt-1 space-y-0.5 border-l border-slate-200 pl-2">
+          <a href="content.php" class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Contents</a>
         </div>
       </details>
       <div class="my-3 border-t border-gray-200"></div>
@@ -68,4 +79,6 @@
 <?php else: ?>
 <main class="mx-auto px-4 py-8 <?= $w ?>">
 <?php endif; ?>
+<?php if (!$portal): ?>
 <h1 class="mb-6 text-2xl font-bold text-brand-forest"><?= e($title) ?></h1>
+<?php endif; ?>
