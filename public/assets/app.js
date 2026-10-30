@@ -46,6 +46,149 @@
     if (event.matches && sidebar) sidebar.dataset.collapsed = 'false';
   });
 
+  const librarySidebar = document.querySelector('[data-library-sidebar]');
+  const libraryToggle = document.querySelector('#library-sidebar-toggle');
+  const libraryBackdrop = document.querySelector('#library-sidebar-backdrop');
+
+  function setLibrarySidebarLabel(expanded, label) {
+    libraryToggle?.setAttribute('aria-expanded', String(expanded));
+    libraryToggle?.setAttribute('aria-label', label);
+    libraryToggle?.setAttribute('title', label);
+  }
+
+  function closeLibrarySidebar() {
+    if (!librarySidebar) return;
+    librarySidebar.dataset.open = 'false';
+    libraryBackdrop?.classList.add('hidden');
+    setLibrarySidebarLabel(false, 'Show sidebar');
+  }
+
+  if (librarySidebar && libraryToggle) {
+    if (desktopLayout.matches) {
+      librarySidebar.dataset.hidden = 'false';
+      setLibrarySidebarLabel(true, 'Hide sidebar');
+    } else {
+      librarySidebar.dataset.hidden = 'false';
+      librarySidebar.dataset.open = 'false';
+      setLibrarySidebarLabel(false, 'Show sidebar');
+    }
+
+    libraryToggle.addEventListener('click', () => {
+      if (desktopLayout.matches) {
+        const hidden = librarySidebar.dataset.hidden !== 'true';
+        librarySidebar.dataset.hidden = String(hidden);
+        setLibrarySidebarLabel(!hidden, hidden ? 'Show sidebar' : 'Hide sidebar');
+        return;
+      }
+
+      const open = librarySidebar.dataset.open !== 'true';
+      librarySidebar.dataset.hidden = 'false';
+      librarySidebar.dataset.open = String(open);
+      libraryBackdrop?.classList.toggle('hidden', !open);
+      setLibrarySidebarLabel(open, open ? 'Close sidebar' : 'Show sidebar');
+    });
+
+    libraryBackdrop?.addEventListener('click', closeLibrarySidebar);
+    librarySidebar.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+      if (!desktopLayout.matches) closeLibrarySidebar();
+    }));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && librarySidebar.dataset.open === 'true') closeLibrarySidebar();
+    });
+    desktopLayout.addEventListener('change', (event) => {
+      librarySidebar.dataset.hidden = 'false';
+      librarySidebar.dataset.open = 'false';
+      libraryBackdrop?.classList.add('hidden');
+      setLibrarySidebarLabel(event.matches, event.matches ? 'Hide sidebar' : 'Show sidebar');
+    });
+  }
+
+  const contentUploadForm = document.querySelector('#content-upload-form');
+  const contentFileInput = document.querySelector('#content-upload');
+  const contentFolderInput = document.querySelector('#content-folder-upload');
+  const contentDropZone = document.querySelector('#content-drop-zone');
+  const contentSelection = document.querySelector('#content-upload-selection');
+  const contentUploadSubmit = document.querySelector('#content-upload-submit');
+  const contentRelativePaths = document.querySelector('#content-relative-paths');
+
+  if (contentUploadForm && contentFileInput && contentFolderInput && contentDropZone && contentSelection && contentUploadSubmit && contentRelativePaths) {
+    const setContentFiles = (files, paths) => {
+      const transfer = new DataTransfer();
+      for (const file of files) transfer.items.add(file);
+      contentFileInput.files = transfer.files;
+      contentRelativePaths.replaceChildren(...paths.map((path) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'relative_paths[]';
+        input.value = path;
+        return input;
+      }));
+      contentUploadSubmit.disabled = files.length === 0;
+      contentUploadSubmit.classList.toggle('text-slate-400', files.length === 0);
+      contentUploadSubmit.classList.toggle('text-brand-purple', files.length > 0);
+      contentSelection.textContent = files.length
+        ? `${files.length} file${files.length === 1 ? '' : 's'} selected`
+        : 'or choose multiple files, or select a folder';
+    };
+
+    contentFileInput.addEventListener('change', () => {
+      const files = [...contentFileInput.files];
+      setContentFiles(files, files.map((file) => file.webkitRelativePath || file.name));
+    });
+    contentFolderInput.addEventListener('change', () => {
+      const files = [...contentFolderInput.files];
+      setContentFiles(files, files.map((file) => file.webkitRelativePath || file.name));
+    });
+
+    const entryFile = (entry) => new Promise((resolve, reject) => {
+      entry.file(resolve, reject);
+    });
+    const readDirectory = async (entry) => {
+      const reader = entry.createReader();
+      const entries = [];
+      while (true) {
+        const batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+        if (!batch.length) break;
+        entries.push(...batch);
+      }
+      return entries;
+    };
+    const readEntry = async (entry, parentPath = '') => {
+      const entryPath = parentPath ? `${parentPath}/${entry.name}` : entry.name;
+      if (entry.isFile) return [{ file: await entryFile(entry), path: entryPath }];
+      if (!entry.isDirectory) return [];
+      const children = await readDirectory(entry);
+      const nested = await Promise.all(children.map((child) => readEntry(child, entryPath)));
+      return nested.flat();
+    };
+
+    contentDropZone.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      contentDropZone.classList.add('border-brand-purple', 'bg-purple-50');
+    });
+    contentDropZone.addEventListener('dragleave', (event) => {
+      if (!contentDropZone.contains(event.relatedTarget)) contentDropZone.classList.remove('border-brand-purple', 'bg-purple-50');
+    });
+    contentDropZone.addEventListener('drop', async (event) => {
+      event.preventDefault();
+      contentDropZone.classList.remove('border-brand-purple', 'bg-purple-50');
+      try {
+        const entries = [...event.dataTransfer.items]
+          .map((item) => item.webkitGetAsEntry?.())
+          .filter(Boolean);
+        const dropped = entries.length
+          ? (await Promise.all(entries.map((entry) => readEntry(entry)))).flat()
+          : [...event.dataTransfer.files].map((file) => ({ file, path: file.webkitRelativePath || file.name }));
+        setContentFiles(dropped.map((item) => item.file), dropped.map((item) => item.path));
+      } catch (error) {
+        console.error('Could not read the dropped Bank Content files.', error);
+        contentSelection.textContent = 'Could not read the dropped items. Please choose the files or folder instead.';
+        contentUploadSubmit.disabled = true;
+        alert('The selected files or folder could not be read. Please choose them using the browse buttons.');
+      }
+    });
+  }
+
   async function save(el, field, value) {
     const code = el.closest('tr').dataset.code;
     try {
