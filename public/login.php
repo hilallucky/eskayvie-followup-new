@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_check($_POST['_csrf'] ?? null)) $error = 'Session expired, please try again.';
     elseif ($expected === null || (int)($_POST['captcha'] ?? -1) !== $expected) $error = 'Captcha answer is incorrect.';
     else { $r = Auth::attempt(trim($_POST['username'] ?? ''), $_POST['password'] ?? ''); if ($r === true) redirect('index.php'); $error = $r; }
-    //  $r = Auth::attempt(trim($_POST['username'] ?? ''), $_POST['password'] ?? ''); if ($r === true) redirect('index.php'); $error = $r; 
+    //  $r = Auth::attempt(trim($_POST['username'] ?? ''), $_POST['password'] ?? ''); if ($r === true) redirect('index.php'); $error = $r;
 }
 [$a, $b] = [random_int(1, 9), random_int(1, 9)]; $_SESSION['captcha'] = $a + $b;
 component('layout-start', ['title' => 'Login Form']);

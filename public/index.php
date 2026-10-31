@@ -18,7 +18,7 @@ if ($flash) component('alert', ['type' => $flash[0], 'message' => $flash[1]]); ?
   <dt class="text-gray-500">Join Date</dt><dd class="font-medium"><?= e(date('d M Y', strtotime($me['join_date']))) ?></dd>
 </dl>
 
-<details id="add-downline" class="mb-6 rounded border border-gray-300 p-4">
+<details id="add-downline.php" class="mb-6 rounded border border-gray-300 p-4">
   <summary class="cursor-pointer font-semibold text-brand-purple">Add New Downline</summary>
   <form method="post" action="add-downline.php" class="mt-4 grid max-w-3xl gap-4 sm:grid-cols-4 sm:items-end">
     <input type="hidden" name="_csrf" value="<?= e(csrf()) ?>">

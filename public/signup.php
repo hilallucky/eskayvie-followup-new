@@ -38,7 +38,7 @@ component('layout-start', ['title' => 'Signup']);
 
 if ($done) {
     component('alert', ['type' => 'ok', 'message' => 'Saved! Your member code is ' . $done['code'] . '. A confirmation link was sent by email.']);
-    // component('button', ['label' => 'Go to login', 'href' => 'login.php', 'variant' => 'secondary']);
+    // component('button', ['label' => 'Go to login.php', 'href' => 'login.php', 'variant' => 'secondary']);
     if (cfg('mail_debug')) echo '<p class="break-all text-xs">Dev link: <a class="text-brand-purple underline" href="' . e($done['link']) . '">' . e($done['link']) . '</a></p>';
 
 } else {
@@ -51,7 +51,7 @@ if ($done) {
   component('input', ['label' => 'Password', 'namex' => 'password', 'type' => 'password', 'attrs' => 'minlength="8"']);
   component('input', ['label' => 'Join Date', 'namex' => 'join_date', 'type' => 'date', 'value' => $_POST['join_date'] ?? date('Y-m-d')]);
   ?>
-  <div class="flex gap-2"><?php component('button', ['label' => 'Save', 'type' => 'submit']); component('button', ['label' => 'Back to login', 'href' => 'login.php', 'variant' => 'ghost']); ?></div>
+  <div class="flex gap-2"><?php component('button', ['label' => 'Save', 'type' => 'submit']); component('button', ['label' => 'Back to login.php', 'href' => 'login.php', 'variant' => 'ghost']); ?></div>
   <p class="text-xs text-gray-500">After saved: an email is sent with your username and a link to confirm your account.</p>
 </form>
 <?php }
