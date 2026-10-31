@@ -499,7 +499,7 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
                   <a aria-label="Download <?= e($item['name']) ?>" title="Download" href="content-file.php?id=<?= rawurlencode($item['id']) ?>&amp;download=1" class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-brand-purple"><svg aria-hidden="true" viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v9m0 0 3-3m-3 3L7 9M4 13v3h12v-3"/></svg></a>
                 <?php endif; ?>
                 <?php if ($canManage): ?>
-                  <details class="relative">
+                  <details class="relative" data-manage-popup>
                     <summary class="cursor-pointer list-none rounded p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Manage <?= e($item['name']) ?>" title="Manage item">•••</summary>
                     <div class="absolute right-0 z-20 mt-1 w-64 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-lg">
                       <form method="post" class="space-y-2">

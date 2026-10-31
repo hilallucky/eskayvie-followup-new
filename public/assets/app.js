@@ -4,6 +4,10 @@
 
   document.addEventListener('click', (event) => {
     if (!(event.target instanceof Element)) return;
+    document.querySelectorAll('details[data-manage-popup][open]').forEach((popup) => {
+      if (!popup.contains(event.target)) popup.open = false;
+    });
+
     const previewButton = event.target.closest('[data-qr-preview]');
     if (previewButton) {
       const dialog = document.querySelector('[data-qr-dialog]');
@@ -33,7 +37,7 @@
     const url = new URL(image.src, window.location.href);
     url.searchParams.set('regen', String(Date.now()));
     image.src = url.toString();
-  });
+  }, true);
 
   document.querySelector('[data-qr-dialog]')?.addEventListener('click', (event) => {
     if (event.target === event.currentTarget) event.currentTarget.close();
