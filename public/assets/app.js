@@ -2,6 +2,43 @@
   const csrf = document.querySelector('meta[name=csrf]')?.content ?? '';
   const flash = (el, cls) => { el.classList.add('ring-2', cls); setTimeout(() => el.classList.remove('ring-2', cls), 1200); };
 
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return;
+    const previewButton = event.target.closest('[data-qr-preview]');
+    if (previewButton) {
+      const dialog = document.querySelector('[data-qr-dialog]');
+      const sourceImage = document.getElementById(previewButton.dataset.qrImage);
+      const previewImage = dialog?.querySelector('[data-qr-dialog-image]');
+      const previewTitle = dialog?.querySelector('[data-qr-dialog-title]');
+      const previewUrl = dialog?.querySelector('[data-qr-dialog-url]');
+      if (!dialog || !sourceImage || !previewImage || !previewTitle || !previewUrl) return;
+      previewImage.src = sourceImage.src;
+      previewImage.alt = `QR code for ${previewButton.dataset.qrTitle}`;
+      previewTitle.textContent = `QR code for ${previewButton.dataset.qrTitle}`;
+      previewUrl.href = previewButton.dataset.qrUrl;
+      previewUrl.textContent = previewButton.dataset.qrUrl;
+      dialog.showModal();
+      return;
+    }
+
+    if (event.target.closest('[data-qr-dialog-close]')) {
+      document.querySelector('[data-qr-dialog]')?.close();
+      return;
+    }
+
+    const button = event.target.closest('[data-qr-regenerate]');
+    if (!button) return;
+    const image = document.getElementById(button.dataset.qrTarget);
+    if (!image) return;
+    const url = new URL(image.src, window.location.href);
+    url.searchParams.set('regen', String(Date.now()));
+    image.src = url.toString();
+  });
+
+  document.querySelector('[data-qr-dialog]')?.addEventListener('click', (event) => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+
   const sidebar = document.querySelector('[data-sidebar]');
   const sidebarToggle = document.querySelector('#sidebar-toggle');
   const sidebarBackdrop = document.querySelector('#sidebar-backdrop');

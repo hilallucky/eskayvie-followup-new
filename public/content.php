@@ -3,6 +3,43 @@ require __DIR__ . '/../src/bootstrap.php';
 $user = Auth::user();
 $canManage = Auth::canManageContent();
 $isContentAdmin = Auth::isContentAdministrator();
+$qrBaseUrl = rtrim((string)cfg('base_url'), '/');
+$qrTargetForItem = static function (array $item) use ($qrBaseUrl): string {
+    return $qrBaseUrl . '/content.php?' . http_build_query(
+        $item['kind'] === 'folder'
+            ? ['folder' => $item['id']]
+            : ['folder' => (string)($item['parent_id'] ?? ''), 'item' => $item['id']]
+    );
+};
+if (isset($_GET['qr'])) {
+    if (!$canManage) {
+        http_response_code(403);
+        exit('You do not have permission to generate Bank Content QR codes.');
+    }
+
+    $qrItem = ContentLibrary::find((string)$_GET['qr']);
+    if (!$qrItem || !in_array($qrItem['kind'], ['folder', 'file'], true) || ($qrItem['kind'] === 'file' && !$qrItem['stored_name'])) {
+        http_response_code(404);
+        exit('The item does not have a QR code destination.');
+    }
+
+    $qrCode = new Endroid\QrCode\QrCode(
+        data: $qrTargetForItem($qrItem),
+        encoding: new Endroid\QrCode\Encoding\Encoding('UTF-8'),
+        errorCorrectionLevel: Endroid\QrCode\ErrorCorrectionLevel::Medium,
+        size: 160,
+        margin: 4
+    );
+    $qrImage = (new Endroid\QrCode\Writer\SvgWriter())->write($qrCode);
+
+    session_write_close();
+    header('Content-Type: ' . $qrImage->getMimeType());
+    header('Cache-Control: no-store, private');
+    header('X-Content-Type-Options: nosniff');
+    echo $qrImage->getString();
+    exit;
+}
+
 $approvedOnly = !$canManage;
 $folders = ContentLibrary::folders($approvedOnly);
 $view = (string)($_GET['view'] ?? '');
@@ -380,8 +417,8 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
           </div>
         <?php endif; ?>
         <div class="relative rounded-lg border border-slate-200 bg-white">
-          <div class="hidden rounded-t-lg <?= $canManage ? 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' : 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' ?> gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-[11px] font-medium text-slate-500 sm:grid">
-            <span>Name</span><?php if ($canManage): ?><span>Owner</span><?php endif; ?><span>Last modified</span><span>File size</span><?php if ($canManage): ?><span>Status</span><?php endif; ?><span class="text-right">Actions</span>
+          <div class="hidden rounded-t-lg <?= $canManage ? 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(9rem,0.5fr)_minmax(5rem,0.5fr)]' : 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' ?> gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-[11px] font-medium text-slate-500 sm:grid">
+            <span>Name</span><?php if ($canManage): ?><span>Owner</span><?php endif; ?><span>Last modified</span><span>File size</span><?php if ($canManage): ?><span>Status</span><span class="text-center">QR code</span><?php endif; ?><span class="text-right">Actions</span>
           </div>
           <?php if (!$items): ?>
             <div class="px-5 py-14 text-center"><p class="text-sm font-medium text-slate-700"><?= $query === '' ? 'No items in this folder yet' : 'No items match your search' ?></p><?php if ($canManage && $query === ''): ?><p class="mt-2 text-xs text-slate-500">Upload a file or create a folder to get started.</p><?php endif; ?></div>
@@ -391,6 +428,8 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
             $isLink = $item['kind'] === 'link';
             $hasFileContents = $item['kind'] === 'file' && (bool)$item['stored_name'];
             $canOpen = $isFolder || $isLink || $hasFileContents;
+            $canGenerateQr = $isFolder || ($item['kind'] === 'file' && $hasFileContents);
+            $qrEndpoint = 'content.php?qr=' . rawurlencode($item['id']) . '&regen=' . rawurlencode((string)microtime(true));
             $extension = strtolower(pathinfo((string)$item['name'], PATHINFO_EXTENSION));
             [$iconColor, $iconType, $iconLabel] = match (true) {
                 $isFolder => ['text-amber-700 bg-amber-50', 'folder', ''],
@@ -407,7 +446,7 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
                 ? 'content.php?folder=' . rawurlencode($item['id'])
                 : ($isLink ? (in_array(parse_url((string)$item['url'], PHP_URL_SCHEME), ['http', 'https'], true) ? (string)$item['url'] : '#') : ($hasFileContents ? 'content.php?folder=' . rawurlencode((string)($folderId ?? '')) . '&item=' . rawurlencode($item['id']) : '#'));
             ?>
-            <div class="grid gap-2 border-b border-slate-100 px-4 py-3 last:border-0 sm:<?= $canManage ? 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' : 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' ?> sm:items-center sm:gap-3">
+            <div class="grid gap-2 border-b border-slate-100 px-4 py-3 last:border-0 sm:<?= $canManage ? 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.35fr)_minmax(9rem,0.5fr)_minmax(5rem,0.5fr)]' : 'grid-cols-[minmax(13rem,1fr)_minmax(6rem,0.35fr)_minmax(7rem,0.5fr)_minmax(5rem,0.35fr)_minmax(5rem,0.5fr)]' ?> sm:items-center sm:gap-3">
               <div class="flex min-w-0 items-center gap-2.5">
                 <span class="<?= $iconColor ?> flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                   <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -444,6 +483,16 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
               <?php if ($canManage): ?>
                 <?php $statusClass = match ($item['status']) { 'Approved' => 'bg-emerald-50 text-emerald-700', 'In review' => 'bg-amber-50 text-amber-700', default => 'bg-sky-50 text-sky-700' }; ?>
                 <span class="hidden text-[10px] sm:block"><span class="<?= $statusClass ?> inline-flex rounded px-2 py-1 font-medium"><?= e($item['status']) ?></span></span>
+                <div class="flex items-center justify-start gap-2 sm:justify-center">
+                  <?php if ($canGenerateQr): ?>
+                    <button type="button" data-qr-preview data-qr-image="qr-image-<?= e($item['id']) ?>" data-qr-title="<?= e($item['name']) ?>" data-qr-url="<?= e($qrTargetForItem($item)) ?>" aria-label="Preview QR code for <?= e($item['name']) ?>" class="rounded focus:outline-none focus:ring-2 focus:ring-purple-300">
+                      <img id="qr-image-<?= e($item['id']) ?>" src="<?= e($qrEndpoint) ?>" alt="" width="80" height="80" class="h-16 w-16 rounded border border-slate-200 bg-white">
+                    </button>
+                    <button type="button" data-qr-regenerate data-qr-target="qr-image-<?= e($item['id']) ?>" class="rounded border border-slate-200 px-2 py-1 text-[10px] font-medium text-slate-600 hover:bg-slate-50">Regenerate</button>
+                  <?php else: ?>
+                    <span class="text-[10px] text-slate-400"><?= $isFolder ? '' : ($isLink ? '—' : 'Upload file first') ?></span>
+                  <?php endif; ?>
+                </div>
               <?php endif; ?>
               <div class="flex items-center justify-end gap-1">
                 <?php if (!$isFolder && !$isLink && $item['kind'] === 'file' && $item['stored_name']): ?>
@@ -477,6 +526,18 @@ details[open] > summary .content-menu-chevron { transform: rotate(90deg); }
             </div>
           <?php endforeach; endif; ?>
         </div>
+      <?php endif; ?>
+      <?php if ($canManage): ?>
+        <dialog data-qr-dialog class="w-[min(92vw,28rem)] rounded-xl border border-slate-200 bg-white p-0 text-slate-800 shadow-xl backdrop:bg-slate-900/50">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+            <div><h2 data-qr-dialog-title class="text-base font-semibold">QR code</h2><p class="mt-1 text-xs text-slate-500">Scan to open this Bank Content item.</p></div>
+            <button type="button" data-qr-dialog-close aria-label="Close QR preview" class="rounded px-2 py-1 text-lg leading-none text-slate-500 hover:bg-slate-100">×</button>
+          </div>
+          <div class="flex flex-col items-center gap-3 p-5">
+            <img data-qr-dialog-image alt="" width="320" height="320" class="h-72 w-72 max-w-full rounded border border-slate-200 bg-white">
+            <a data-qr-dialog-url class="max-w-full break-all text-center text-xs text-brand-purple underline" target="_blank" rel="noopener noreferrer"></a>
+          </div>
+        </dialog>
       <?php endif; ?>
     </div>
   </section>
